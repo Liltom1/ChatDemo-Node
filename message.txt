@@ -8,6 +8,7 @@
 {"roomId":"3","message":"ascasca","from":{"id":"2","name":"user2"},"time":1737211236117,"type":"text"}
 {"roomId":"4","message":"123456456","from":{"id":"1","name":"user1"},"time":1737297964182,"type":"text"}
 {"roomId":"4","message":"asasdasdad","from":{"id":"1","name":"user1"},"time":1737298654629,"type":"text"}
-
-{"roomId":"1","message":"测试消息","from":{"id":"2","name":"user2"},"time":1737553684275,"type":"text"}
-{"roomId":"2","message":"test","from":{"id":"1","name":"user1"},"time":1737553826366,"type":"text"}
+{"roomId":"3","message":"我是user1","from":{"id":"1","name":"user1"},"time":1737560273025,"type":"text"}
+{"roomId":"3","message":"我是user3","from":{"id":"3","name":"user3"},"time":1737560284637,"type":"text"}
+{"roomId":"3","message":"/images/1737560297028_img1.webp","from":{"id":"1","name":"user1"},"time":1737560297028,"type":"img"}
+{"roomId":"5","message":"123123","from":{"id":"2","name":"user2"},"time":1737560328858,"type":"text"}

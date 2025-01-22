@@ -95,10 +95,7 @@ const io = new Server(server, {
 
 io.on('connection', (socket) => {
     const headers = socket.request.headers;
-    console.log(headers.authorization, 'headers.authorization');
-    
     jwt.verify(headers.authorization, secretKey, (err, decoded) => {
-        console.log(err,'err');
         if (err) {
             socket.emit('reject', false)
             return
@@ -201,6 +198,8 @@ io.on('connection', (socket) => {
     socket.on('searchCurrentRoomMessage', ({ roomId }) => {
         fs2.readFile('./message.txt').then(data => {
             const messageList = data.toString().split('\n').filter(item => item).map(item => JSON.parse(item))
+            console.log(messageList, 'messageList');
+            
             const currentRoomMessageList = messageList.filter(item => item.roomId === roomId)
             socket.emit('receiveCurrentRoomMessage', currentRoomMessageList)
         }).catch(err => {
@@ -237,7 +236,7 @@ io.on('connection', (socket) => {
             let users = []
             users = data.toString().split('\n').filter(item => item).map(item => JSON.parse(item))
             const userInfo = users.find(item => item.id === user.id)
-            userInfo.rooms.push({ id: roomId, name: roomName })
+            userInfo.rooms.push({ id: roomId.toString(), name: roomName })
             fs.writeFile(`./userinfo.txt`, users.map(item => JSON.stringify(item)).join('\n'), (err) => {
                 if (err) {
                     console.log('写入文件失败', err)
@@ -251,35 +250,45 @@ io.on('connection', (socket) => {
 
     //加入房间
     socket.on('addRoom', async ({ user, roomName }) => {
-        let roomInfo = null
+        let roomInfo1 = null
         await fs2.readFile('./room.txt').then(data => {
+            // console.log(roomInfo, 'roomInfo');
             const room = data.toString().split('\n').filter(item => item).map(item => JSON.parse(item))
-            roomInfo = room.find(item => item.name === roomName)
+            console.log(room, 'room');
+            console.log(roomName, 'roomName');
+            let roomInfo = room.find(item => item.name === roomName)
             roomInfo.people.push(user.id)
+            console.log(roomInfo, 'roomInfo');
+    
+            //将消息写入文件
             fs.writeFile(`./room.txt`, room.map(item => JSON.stringify(item)).join('\n'), (err) => {
                 if (err) {
                     console.log('写入文件失败', err)
                 }
             })
+
+            //将房间信息写入用户信息
+            fs2.readFile('./userinfo.txt').then(data => {
+                let users = []
+                users = data.toString().split('\n').filter(item => item).map(item => JSON.parse(item))
+                const userInfo = users.find(item => item.id === user.id)
+                console.log({ id: roomInfo.id.toString(), name: roomName },'userInfo');
+                
+                userInfo.rooms.push({ id: roomInfo.id.toString(), name: roomName })
+                fs.writeFile(`./userinfo.txt`, users.map(item => JSON.stringify(item)).join('\n'), (err) => {
+                    if (err) {
+                        console.log('写入文件失败', err)
+                    }
+                })
+            }).catch(err => {
+                console.log('读取文件失败', err)
+            })
+            socket.emit('addRoomSuccess')
         }).catch(err => {
             console.log('读取文件失败', err)
         })
 
-        //将房间信息写入用户信息
-        fs2.readFile('./userinfo.txt').then(data => {
-            let users = []
-            users = data.toString().split('\n').filter(item => item).map(item => JSON.parse(item))
-            const userInfo = users.find(item => item.id === user.id)
-            userInfo.rooms.push({ id: roomInfo.id.toString(), name: roomName })
-            fs.writeFile(`./userinfo.txt`, users.map(item => JSON.stringify(item)).join('\n'), (err) => {
-                if (err) {
-                    console.log('写入文件失败', err)
-                }
-            })
-        }).catch(err => {
-            console.log('读取文件失败', err)
-        })
-        socket.emit('addRoomSuccess')
+
     })
 
     //断开链接内置事件
